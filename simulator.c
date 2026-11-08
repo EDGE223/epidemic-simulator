@@ -27,7 +27,7 @@ typedef enum {
     MENU_EXIT = 4,
 } menu_option_t;
 
-population_t normalizePopulation(population_t p) {
+static population_t normalizePopulation(population_t p) {
     let sum = p.susceptible + p.infected + p.recovered;
 
     if (sum == 0.0f)
@@ -45,66 +45,58 @@ population_t normalizePopulation(population_t p) {
 
     let recovered = remainingPopulation - infected;
 
-    return (population_t){
-        .susceptible = susceptible, .infected = infected, .recovered = recovered
-    };
+    return (population_t){.susceptible = susceptible,
+                          .infected = infected,
+                          .recovered = recovered};
 }
 
-void showPopulation(uint32_t day, state_t state) {
+static void showPopulation(uint32_t day, state_t state) {
     let population = *(population_t *)state.populationHistory[day];
 
     let normalized = normalizePopulation(population);
 
-    printf(
-        "Day: %u\n"
-        "Susceptible: %g\n"
-        "Infected: %g\n"
-        "Recovered: %g\n",
-        day,
-        normalized.susceptible,
-        normalized.infected,
-        normalized.recovered
-    );
+    printf("Day: %u\n"
+           "Susceptible: %g\n"
+           "Infected: %g\n"
+           "Recovered: %g\n",
+           day,
+           normalized.susceptible,
+           normalized.infected,
+           normalized.recovered);
 }
 
-uint32_t showHistoryLoop(state_t state, uint32_t fromDay) {
+static uint32_t showHistoryLoop(state_t state, uint32_t fromDay) {
     if (fromDay > state.day)
         return 0;
 
     let population =
         normalizePopulation(*(population_t *)state.populationHistory[fromDay]);
-    printf(
-        "%3u   %11g   %8g   %9g   %14g   %14g\n",
-        fromDay,
-        population.susceptible,
-        population.infected,
-        population.recovered,
-        state.dailyInfections[fromDay],
-        state.dailyRecoveries[fromDay]
-    );
+    printf("%3u   %11g   %8g   %9g   %14g   %14g\n",
+           fromDay,
+           population.susceptible,
+           population.infected,
+           population.recovered,
+           state.dailyInfections[fromDay],
+           state.dailyRecoveries[fromDay]);
 
     return showHistoryLoop(state, fromDay + 1);
 }
 
-void showHistory(state_t state) {
-    printf(
-        "Day   Susceptible   Infected   Recovered   New infections   New "
-        "recoveries\n"
-    );
+static void showHistory(state_t state) {
+    printf("Day   Susceptible   Infected   Recovered   New infections   New "
+           "recoveries\n");
     (void)showHistoryLoop(state, 0);
 }
 
-menu_option_t menu() {
+static menu_option_t menu() {
     uint32_t choice;
-    printf(
-        "\n"
-        "=== Epidemic Simulator ===\n"
-        "1. Simulate next day\n"
-        "2. Change model parameters\n"
-        "3. Show simulation history\n"
-        "4. Exit\n"
-        "Your choice: "
-    );
+    printf("\n"
+           "=== Epidemic Simulator ===\n"
+           "1. Simulate next day\n"
+           "2. Change model parameters\n"
+           "3. Show simulation history\n"
+           "4. Exit\n"
+           "Your choice: ");
 
     scanf("%u", &choice);
     CLEAR_STDIN
@@ -124,7 +116,7 @@ menu_option_t menu() {
     }
 }
 
-bool checkPopulation(population_t population) {
+static bool checkPopulation(population_t population) {
     return population.susceptible >= 0 && population.infected >= 0 &&
            population.recovered >= 0 &&
            population.susceptible + population.infected +
@@ -132,7 +124,7 @@ bool checkPopulation(population_t population) {
                100;
 }
 
-state_t nextDay(state_t state) {
+static state_t nextDay(state_t state) {
     state_t s = state;
     s.day++;
 
@@ -155,16 +147,16 @@ state_t nextDay(state_t state) {
     let normalizedPopulation = normalizePopulation(population);
 
     s.dailyInfections[s.day] = fmaxf(
-        normalizedNewPopulation.infected - normalizedPopulation.infected, 0.0f
-    );
-    s.dailyRecoveries[s.day] = fmaxf(
-        normalizedNewPopulation.recovered - normalizedPopulation.recovered, 0.0f
-    );
+        normalizedNewPopulation.infected - normalizedPopulation.infected, 0.0f);
+    s.dailyRecoveries[s.day] = fmaxf(normalizedNewPopulation.recovered -
+                                         normalizedPopulation.recovered,
+                                     0.0f);
 
     return s;
 }
 
-state_t alterState(state_t state, float infectionRate, float recoveryRate) {
+static state_t
+alterState(state_t state, float infectionRate, float recoveryRate) {
     state_t s = state;
     s.infectionRate = infectionRate;
     s.recoveryRate = recoveryRate;
@@ -172,7 +164,7 @@ state_t alterState(state_t state, float infectionRate, float recoveryRate) {
     return s;
 }
 
-uint32_t nextStep(state_t state) {
+static uint32_t nextStep(state_t state) {
     switch (menu()) {
     case MENU_SIMULATE_NEXT_DAY: {
         let newState = nextDay(state);
@@ -184,11 +176,9 @@ uint32_t nextStep(state_t state) {
             return EXIT_FAILURE;
         }
         showPopulation(newState.day, newState);
-        if (!(newState.day < MAX_DAYS)) {
-            printf(
-                "Reached maximal number of days that program can simulate. "
-                "Exiting...\n"
-            );
+        if (!(newState.day < MAX_DAYS - 1)) {
+            printf("Reached maximal number of days that program can simulate. "
+                   "Exiting...\n");
             return EXIT_SUCCESS;
         }
         [[clang::musttail]] return nextStep(newState);
@@ -209,8 +199,7 @@ uint32_t nextStep(state_t state) {
         } while (newRecoveryRate < 0 || newRecoveryRate > 1);
         printf("Parameters updated.\n");
         [[clang::musttail]] return nextStep(
-            alterState(state, newInfectionRate, newRecoveryRate)
-        );
+            alterState(state, newInfectionRate, newRecoveryRate));
     }
     case MENU_SHOW_SIMULATION_HISTORY: {
         showHistory(state);
@@ -223,7 +212,7 @@ uint32_t nextStep(state_t state) {
     return EXIT_FAILURE;
 }
 
-int main() {
+int setup() {
     population_t population = {80, 10, 10};
 
     state_t state = {

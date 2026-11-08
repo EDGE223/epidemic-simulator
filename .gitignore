@@ -2,13 +2,26 @@
 /build/
 /sim
 *.o
+*.a
+*.so
 *.d
 
-# IDE
+# Clang
+*.pch
+*.gch
+
+# IDEs and editors
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # Temporary files
 *.tmp
-*~
+*.bak
 

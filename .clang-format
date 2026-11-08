@@ -1,7 +1,19 @@
-CompileFlags:
-  Add:
-    - -std=c23
-    - -Wall
-    - -Wextra
-    - -Werror
-    - -Wpedantic
+---
+Language: C
+BasedOnStyle: LLVM
+BreakBeforeBraces: Attach
+IndentWidth: 4
+AllowShortFunctionsOnASingleLine: None
+SortIncludes: Never
+BinPackArguments: false
+BinPackParameters: false
+
+---
+Language: Cpp
+BasedOnStyle: LLVM
+BreakBeforeBraces: Attach
+IndentWidth: 4
+AllowShortFunctionsOnASingleLine: None
+SortIncludes: Never
+BinPackArguments: false
+BinPackParameters: false

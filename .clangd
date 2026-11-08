@@ -1,6 +1,22 @@
+---
+If:
+  PathMatch: .*\.c
+
 CompileFlags:
   Add:
-    - -std-c23
+    - -std=c23
+    - -Wall
+    - -Wextra
+    - -Werror
+    - -Wpedantic
+
+---
+If:
+  PathMatch: .*\.cpp
+
+CompileFlags:
+  Add:
+    - -std=c++23
     - -Wall
     - -Wextra
     - -Werror
