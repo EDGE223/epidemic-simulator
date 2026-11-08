@@ -1,0 +1,14 @@
+# Build artifacts
+/build/
+/sim
+*.o
+*.d
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*~
+
