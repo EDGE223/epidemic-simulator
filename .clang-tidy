@@ -1,0 +1,28 @@
+Checks: '-*,clang-analyser-*,bugprone-*,cert-*,custom-pure-side-effects-*'
+
+CheckOptions:
+    - key: bugprone-easily-swappable-parameters.MinimumLength
+      value: '3'
+
+WarningsAsErrors: '*'
+
+CustomChecks:
+  - Name: pure-side-effects
+    Query: |
+      match functionDecl(
+        isDefinition(),
+        hasAttr("attr::Pure"),
+        hasDescendant(
+          callExpr(
+            callee(
+              functionDecl(
+                matchesName("::(printf|fprintf|sprintf|snprintf|puts|putchar|scanf|fscanf|sscanf|fgets|fputs|getchar|fgetc|fputc|fread|fwrite|fopen|fclose|perror)")
+              )
+            )
+          )
+        )
+      ).bind("function")
+    Diagnostic:
+      - BindName: function
+        Message: 'Function marked pure performs I/O operations'
+        Level: Warning

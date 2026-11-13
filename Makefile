@@ -20,8 +20,8 @@ DEPS := $(OBJECTS:.o=.d)
 
 CPPFLAGS := -Iinclude
 
-CFLAGS := -std=c23 -Wall -Wextra -Wpedantic -Werror
-CXXFLAGS := -std=c++23 -Wall -Wextra -Wpedantic -Werror
+CFLAGS := -std=c23 -Wall -Wextra -Wpedantic -Werror -Wattributes
+CXXFLAGS := -std=c++23 -Wall -Wextra -Wpedantic -Werror -Wattributes
 
 ifeq ($(MODE),debug)
     CFLAGS += -O0 -g3 -DDEBUG
@@ -38,6 +38,8 @@ all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+$(OBJECTS): | tidy
 
 $(OUT_DIR)/%.o: %.c
 	mkdir -p $(@D)
@@ -60,3 +62,11 @@ run: all
 
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET)
+
+tidy:
+	clang-tidy $(C_SOURCES)  \
+	--warnings-as-errors='*' \
+	-- $(CFLAGS)
+	clang-tidy $(CXX_SOURCES) \
+	--warnings-as-errors='*' \
+	-- $(CPPFLAGS)
